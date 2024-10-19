@@ -52,7 +52,8 @@ def login():
             # Store the token in the session
             session['token'] = token
             # Redirect to the next page or home page
-            return redirect(request.args.get('next') or url_for('home'))
+            next_url = request.args.get('next') or url_for('home')
+            return redirect(f"{next_url}?token={token}")
 
     # Render the login page
     return render_template('login.html')
