@@ -1,3 +1,4 @@
+from urllib.parse import urlencode, urlparse
 import jwt
 import datetime
 from flask import Flask, request, redirect, url_for, session, render_template
@@ -51,9 +52,19 @@ def login():
             }, JWT_SECRET, algorithm="HS256")
             # Store the token in the session
             session['token'] = token
-            # Redirect to the next page or home page
+
             next_url = request.args.get('next') or url_for('home')
-            return redirect(f"{next_url}?token={token}")
+            
+            # 从 next_url 中提取主机信息
+            parsed_url = urlparse(next_url)
+            host = f"{parsed_url.scheme}://{parsed_url.netloc}"
+
+            # 动态生成回调 URL
+            callback_url = f"{host}/callback"
+            query_params = urlencode({'token': token, 'next': next_url}) 
+
+            # 回调到统一的处理页面
+            return redirect(f"{callback_url}?{query_params}")
 
     # Render the login page
     return render_template('login.html')
